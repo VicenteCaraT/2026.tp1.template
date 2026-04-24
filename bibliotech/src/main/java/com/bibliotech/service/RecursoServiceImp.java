@@ -37,19 +37,16 @@ public class RecursoServiceImp implements RecursoService {
 
     @Override
     public List<Recurso> buscarPorTitulo(String titulo) {
-        // TODO: implement
-        return List.of();
+        return recursoRepository.buscarPorTitulo(titulo);
     }
 
     @Override
     public List<Recurso> buscarPorAutor(String autor) {
-        // TODO: implement
-        return List.of();
+        return recursoRepository.buscarPorAutor(autor);
     }
 
     @Override
     public List<Recurso> buscarPorCategoria(Categoria categoria) {
-        // TODO: implement
-        return List.of();
+        return recursoRepository.buscarPorCategoria(categoria);
     }
 }

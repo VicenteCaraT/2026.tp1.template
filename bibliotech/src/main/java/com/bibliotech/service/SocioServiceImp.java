@@ -1,5 +1,7 @@
 package com.bibliotech.service;
 
+import com.bibliotech.exception.DniDuplicadoException;
+import com.bibliotech.exception.EmailDuplicadoException;
 import com.bibliotech.model.Socio;
 import com.bibliotech.repository.SocioRepository;
 
@@ -18,7 +20,13 @@ public class SocioServiceImp implements SocioService {
 
     @Override
     public void registrarSocio(Socio socio) {
-        // TODO: implement
+        if (socioRepository.buscarPorDni(socio.getDni()).isPresent()) {
+            throw new DniDuplicadoException();
+        }
+        if (socioRepository.buscarPorEmail(socio.getEmail()).isPresent()) {
+            throw new EmailDuplicadoException();
+        }
+        socioRepository.guardar(socio);
     }
 
     @Override
@@ -28,13 +36,11 @@ public class SocioServiceImp implements SocioService {
 
     @Override
     public Optional<Socio> buscarPorDni(String dni) {
-        // TODO: implement
-        return Optional.empty();
+        return socioRepository.buscarPorDni(dni);
     }
 
     @Override
     public List<Socio> buscarTodos() {
-        // TODO: implement
-        return List.of();
+        return socioRepository.buscarTodos();
     }
 }
