@@ -78,7 +78,7 @@ public class Main {
 
     private static void registrarLibro() {
         try {
-            System.out.print("ISBN: ");
+            System.out.print("ISBN (13 digitos): ");
             String isbn = scanner.nextLine();
             System.out.print("Título: ");
             String titulo = scanner.nextLine();
@@ -92,7 +92,7 @@ public class Main {
             int paginas = leerEntero();
             System.out.print("Editorial: ");
             String editorial = scanner.nextLine();
-            System.out.print("Ubicación estantería: ");
+            System.out.print("Ubicación estantería (ej: A1-E3): ");
             String ubicacion = scanner.nextLine();
 
             Libro libro = new Libro(isbn, titulo, autor, anio, categoria, paginas, editorial, ubicacion);
@@ -107,7 +107,7 @@ public class Main {
 
     private static void registrarEbook() {
         try {
-            System.out.print("ISBN: ");
+            System.out.print("ISBN (13 digitos): ");
             String isbn = scanner.nextLine();
             System.out.print("Título: ");
             String titulo = scanner.nextLine();
@@ -119,9 +119,9 @@ public class Main {
             Categoria categoria = Categoria.valueOf(scanner.nextLine().toUpperCase());
             System.out.print("Formato (PDF, EPUB): ");
             String formato = scanner.nextLine();
-            System.out.print("Tamaño (MB): ");
+            System.out.print("Tamaño (MB) (ej: 5.2): ");
             double tamanio = Double.parseDouble(scanner.nextLine());
-            System.out.print("URL de descarga: ");
+            System.out.print("URL de descarga (https://...): ");
             String url = scanner.nextLine();
 
             Ebook ebook = new Ebook(isbn, titulo, autor, anio, categoria, formato, tamanio, url);
@@ -178,22 +178,20 @@ public class Main {
 
     private static void registrarSocio(String tipo) {
         try {
-            System.out.print("ID: ");
-            int id = leerEntero();
-            System.out.print("Nombre: ");
+            System.out.print("Nombre (solo letras): ");
             String nombre = scanner.nextLine();
-            System.out.print("DNI: ");
+            System.out.print("DNI (7 u 8 dígitos): ");
             String dni = scanner.nextLine();
-            System.out.print("Email: ");
+            System.out.print("Email (ej: usuario@dominio.com): ");
             String email = scanner.nextLine();
 
-            Socio socio = tipo.equals("ESTUDIANTE")
-                    ? new Estudiante(id, nombre, dni, email)
-                    : new Docente(id, nombre, dni, email);
-
-            socioService.registrarSocio(socio);
+            if (tipo.equals("ESTUDIANTE")) {
+                socioService.registrarEstudiante(nombre, dni, email);
+            } else {
+                socioService.registrarDocente(nombre, dni, email);
+            }
             System.out.println(tipo + " registrado exitosamente.");
-        } catch (DniDuplicadoException | EmailDuplicadoException e) {
+        } catch (BibliotecaException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
@@ -244,9 +242,9 @@ public class Main {
         try {
             System.out.print("ID del socio: ");
             int socioId = leerEntero();
-            System.out.print("ISBN del recurso: ");
+            System.out.print("ISBN del recurso (13 dígitos): ");
             String isbn = scanner.nextLine();
-            System.out.print("Días de préstamo: ");
+            System.out.print("Días de préstamo (1-30): ");
             int dias = leerEntero();
 
             prestamoService.realizarPrestamo(socioId, isbn, dias);
