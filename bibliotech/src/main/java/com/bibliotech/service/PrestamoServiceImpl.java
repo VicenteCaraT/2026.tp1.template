@@ -95,7 +95,7 @@ public class PrestamoServiceImpl implements PrestamoService {
 
     @Override
     public List<Prestamo> buscarPorRecurso(String isbn) {
-        prestamoRepository.buscarPorRecurso(isbn);
+        return prestamoRepository.buscarPorRecurso(isbn);
     }
 
     @Override
