@@ -19,6 +19,8 @@ public class RecursoServiceImp implements RecursoService {
 
     @Override
     public  void registrarRecurso(Recurso recurso) {
+        Validador.validarIsbn(recurso.isbn());
+
         if (recursoRepository.buscarPorId(recurso.isbn()).isPresent()) {
             throw new IsbnDuplicadoException();
         }
