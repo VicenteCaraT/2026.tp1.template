@@ -13,5 +13,9 @@ public interface PrestamoService {
     List<Prestamo> buscarPorSocioId(Integer socioId);
     List<Prestamo> buscarPorRecurso(String isbn);
     List<Prestamo> buscarTodos();
+    List<Prestamo> listarActivos();
+    List<Prestamo> listarVencidos();
+    List<Prestamo> proximosAVencer(int dias);
+    boolean verificarDisponibilidad(String isbn);
 
 }

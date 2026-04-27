@@ -224,6 +224,10 @@ public class Main {
             System.out.println("2. Devolver préstamo");
             System.out.println("3. Listar todos");
             System.out.println("4. Listar por socio");
+            System.out.println("5. Listar activos");
+            System.out.println("6. Listar vencidos");
+            System.out.println("7. Próximos a vencer");
+            System.out.println("8. Verificar disponibilidad de recurso");
             System.out.println("0. Volver");
             System.out.print("Seleccione una opción: ");
 
@@ -232,9 +236,65 @@ public class Main {
                 case 2 -> devolverPrestamo();
                 case 3 -> listarPrestamos();
                 case 4 -> listarPrestamosPorSocio();
+                case 5 -> listarActivos();
+                case 6 -> listarVencidos();
+                case 7 -> proximosAVencer();
+                case 8 -> verificarDisponibilidad();
                 case 0 -> volver = true;
                 default -> System.out.println("Opción inválida.");
             }
+        }
+    }
+
+    private static void listarActivos() {
+        List<Prestamo> prestamos = prestamoService.listarActivos();
+        if (prestamos.isEmpty()) {
+            System.out.println("No hay préstamos activos.");
+        } else {
+            prestamos.forEach(p -> System.out.println(
+                    "- [" + p.getId() + "] " + p.getRecurso().titulo() +
+                            " -> " + p.getSocio().getNombre() +
+                            " | Vence: " + p.getFechaLimite()
+            ));
+        }
+    }
+
+    private static void listarVencidos() {
+        List<Prestamo> prestamos = prestamoService.listarVencidos();
+        if (prestamos.isEmpty()) {
+            System.out.println("No hay préstamos vencidos.");
+        } else {
+            prestamos.forEach(p -> System.out.println(
+                    "- [" + p.getId() + "] " + p.getRecurso().titulo() +
+                            " -> " + p.getSocio().getNombre() +
+                            " | Venció: " + p.getFechaLimite()
+            ));
+        }
+    }
+
+    private static void proximosAVencer() {
+        System.out.print("Días a verificar (ej: 3): ");
+        int dias = leerEntero();
+        List<Prestamo> prestamos = prestamoService.proximosAVencer(dias);
+        if (prestamos.isEmpty()) {
+            System.out.println("No hay préstamos próximos a vencer en " + dias + " días.");
+        } else {
+            prestamos.forEach(p -> System.out.println(
+                    "- [" + p.getId() + "] " + p.getRecurso().titulo() +
+                            " -> " + p.getSocio().getNombre() +
+                            " | Vence: " + p.getFechaLimite()
+            ));
+        }
+    }
+
+    private static void verificarDisponibilidad() {
+        System.out.print("ISBN del recurso (13 dígitos): ");
+        String isbn = scanner.nextLine();
+        boolean disponible = prestamoService.verificarDisponibilidad(isbn);
+        if (disponible) {
+            System.out.println("El recurso está disponible para préstamo.");
+        } else {
+            System.out.println("El recurso no está disponible, tiene un préstamo activo.");
         }
     }
 
