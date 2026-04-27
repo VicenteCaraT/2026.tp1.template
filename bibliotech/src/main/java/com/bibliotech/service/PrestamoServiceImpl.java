@@ -6,9 +6,11 @@ import com.bibliotech.repository.PrestamoRepository;
 import com.bibliotech.repository.RecursoRepository;
 import com.bibliotech.repository.SocioRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class PrestamoServiceImpl implements PrestamoService {
     private final PrestamoRepository prestamoRepository;
@@ -81,6 +83,30 @@ public class PrestamoServiceImpl implements PrestamoService {
         prestamoRepository.buscarPorEstado(EstadoPrestamo.ACTIVO)
                 .forEach(Prestamo::verificarVencimiento);
 
+    }
+
+    @Override
+    public List<Prestamo> listarActivos() {
+        return prestamoRepository.buscarPorEstado(EstadoPrestamo.ACTIVO);
+    }
+
+    @Override
+    public List<Prestamo> listarVencidos() {
+        return prestamoRepository.buscarPorEstado(EstadoPrestamo.VENCIDO);
+    }
+
+    @Override
+    public List<Prestamo> proximosAVencer(int dias) {
+        LocalDate limite = LocalDate.now().plusDays(dias);
+        return listarActivos().stream()
+                .filter(p -> !p.getFechaLimite().isAfter(limite))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean verificarDisponibilidad(String isbn) {
+        return buscarPorRecurso(isbn).stream()
+                .noneMatch(p -> p.getEstado() == EstadoPrestamo.ACTIVO);
     }
 
     @Override
