@@ -7,6 +7,7 @@ import com.bibliotech.repository.RecursoRepository;
 import com.bibliotech.repository.SocioRepository;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,15 +17,18 @@ public class PrestamoServiceImpl implements PrestamoService {
     private final PrestamoRepository prestamoRepository;
     private final RecursoRepository recursoRepository;
     private final SocioRepository socioRepository;
+    private final SancionService sancionService;
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     public PrestamoServiceImpl(
             PrestamoRepository prestamoRepository,
             RecursoRepository recursoRepository,
-            SocioRepository socioRepository) {
+            SocioRepository socioRepository,
+            SancionService sancionService) {
         this.prestamoRepository = prestamoRepository;
         this.recursoRepository = recursoRepository;
         this.socioRepository = socioRepository;
+        this.sancionService = sancionService;
     }
 
     @Override
@@ -33,8 +37,9 @@ public class PrestamoServiceImpl implements PrestamoService {
                 .orElseThrow(SocioNoEncontradoException::new);
 
         // Verificar sanción
-        if (socio instanceof Estudiante || socio instanceof Docente) {
-            // lógica sanción
+        sancionService.verificarSanciones();
+        if (socio.isSancionado()) {
+            throw new SocioSancionadoException("El socio " + socio.getNombre() + " está sancinado hasta " + socio.getFechaFinSancion());
         }
 
         // Verificar límite de prestamo
@@ -72,6 +77,12 @@ public class PrestamoServiceImpl implements PrestamoService {
         // Verificar si ya fue devuelto
         if (prestamo.getEstado() == EstadoPrestamo.DEVUELTO) {
             throw new DevolucionInvalidaException();
+        }
+
+        if (prestamo.getEstado() == EstadoPrestamo.VENCIDO) {
+            long diasRetraso = ChronoUnit.DAYS.between(
+                    prestamo.getFechaLimite(), LocalDate.now());
+            sancionService.aplicarSancion(prestamo.getSocio().getId(), (int)  diasRetraso);
         }
         // Devolver
         prestamo.devolver();
