@@ -17,11 +17,12 @@ public class Main {
     private static final RecursoRepository recursoRepository = new InMemoryRecursoRepository();
     private static final SocioRepository socioRepository = new InMemorySocioRepository();
     private static final PrestamoRepository prestamoRepository = new InMemoryPrestamoRepository();
+    private static final SancionService sancionService = new SancionServiceImp(socioRepository);
 
     // servicios (DIP - inyección por constructor)
     private static final RecursoService recursoService = new RecursoServiceImp(recursoRepository);
     private static final SocioService socioService = new SocioServiceImp(socioRepository);
-    private static final PrestamoService prestamoService = new PrestamoServiceImpl(prestamoRepository, recursoRepository, socioRepository);
+    private static final PrestamoService prestamoService = new PrestamoServiceImpl(prestamoRepository, recursoRepository, socioRepository, sancionService);
 
     public static void main(String[] args) {
         System.out.println("=== Bienvenido a BiblioTech ===");
@@ -35,6 +36,7 @@ public class Main {
                 case 1 -> menuRecursos();
                 case 2 -> menuSocios();
                 case 3 -> menuPrestamos();
+                case 4 -> menuSanciones();
                 case 0 -> {
                     System.out.println("Hasta luego!");
                     corriendo = false;
@@ -49,6 +51,7 @@ public class Main {
         System.out.println("1. Gestión de Recursos");
         System.out.println("2. Gestión de Socios");
         System.out.println("3. Gestión de Préstamos");
+        System.out.println("4. Gestión de Sanciones");
         System.out.println("0. Salir");
         System.out.print("Seleccione una opción: ");
     }
@@ -217,6 +220,7 @@ public class Main {
 
     // PRESTAMOS
     private static void menuPrestamos() {
+        prestamoService.verificarVencimientos();
         boolean volver = false;
         while (!volver) {
             System.out.println("\n--- Gestión de Préstamos ---");
@@ -362,6 +366,54 @@ public class Main {
         } catch (NumberFormatException e) {
             System.out.println("Entrada inválida, se usará 0.");
             return 0;
+        }
+    }
+
+    private static void menuSanciones() {
+        boolean volver = false;
+        while (!volver) {
+            System.out.println("\n--- Gestión de Sanciones ---");
+            System.out.println("1. Listar socios sancionados");
+            System.out.println("2. Verificar si socio está sancionado");
+            System.out.println("0. Volver");
+            System.out.print("Seleccione una opción: ");
+
+            switch (leerEntero()) {
+                case 1 -> listarSancionados();
+                case 2 -> verificarSancion();
+                case 0 -> volver = true;
+                default -> System.out.println("Opción inválida.");
+            }
+        }
+    }
+
+    private static void listarSancionados() {
+        List<Socio> sancionados = sancionService.listarSancionados();
+        if (sancionados.isEmpty()) {
+            System.out.println("No hay socios sancionados.");
+        } else {
+            sancionados.forEach(s -> System.out.println(
+                    "- [" + s.getId() + "] " + s.getNombre() +
+                            " | Sancionado hasta: " + s.getFechaFinSancion()
+            ));
+        }
+    }
+
+    private static void verificarSancion() {
+        System.out.print("ID del socio: ");
+        int id = leerEntero();
+        try {
+            boolean sancionado = sancionService.isSancionado(id);
+            if (sancionado) {
+                socioService.buscarPorId(id).ifPresent(s ->
+                        System.out.println("El socio " + s.getNombre() +
+                                " está sancionado hasta: " + s.getFechaFinSancion())
+                );
+            } else {
+                System.out.println("El socio no está sancionado.");
+            }
+        } catch (BibliotecaException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

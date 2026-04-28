@@ -27,7 +27,7 @@ public class Prestamo {
     }
 
     public void verificarVencimiento() {
-        if (estado == EstadoPrestamo.ACTIVO && LocalDate.now().isAfter(fechaLimite)) {
+        if (estado == EstadoPrestamo.ACTIVO && !LocalDate.now().isBefore(fechaLimite)) {
             this.estado = EstadoPrestamo.VENCIDO;
         }
     }
